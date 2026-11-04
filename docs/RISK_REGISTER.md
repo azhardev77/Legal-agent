@@ -9,7 +9,7 @@
 | RSK-REG-05 | No official Java SAM decoder | Medium | OPEN | Parse boxes per documented grammar (mandatory); store raw mask; raster decode best-effort/documented |
 | RSK-REG-06 | Live API shapes drift from docs | Medium | OPEN | Config-driven adapters + probe script + test doubles; record probe results when key exists |
 | RSK-REG-07 | Playwright browsers uninstallable | Low | OPEN | Attempt at M8; else TC-E2E-02 NOT_RUN with reason |
-| RSK-REG-08 | R14 font unobtainable offline | Low | OPEN | Try bundled/licensed TTF with glyph check; else "Rs." + documented (tests normalize prefix) |
+| RSK-REG-08 | R14 font unobtainable offline | Low | CLOSED (fallback) | Offline search found no open-license TTF with U+20B9 (see TECH_STACK.md). "Rs." fallback active + pinned by RsFallbackTest; MoneyUtils/quote-verify accept both forms. |
 | RSK-REG-09 | Time/effort shortage | High | OPEN | Finish earlier milestones completely; no half-built critical workflows |
 
 PROMPT_DEFECT entries (if any golden value proves arithmetically wrong): none at Step B. Rule: keep the test,

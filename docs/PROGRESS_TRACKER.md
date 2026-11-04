@@ -11,6 +11,8 @@ data/storage). After context loss: re-read MASTER_PROMPT.md + this file.
 - Step A environment: PASSED (JDK 21.0.11, Maven 3.9.6, Node 24.21.0, npm 11.19.0, git 2.55.0; docker daemon
   DOWN; MODEL_API_KEY EMPTY → FALLBACK mode; evidence docs/test-logs/env-*).
 - Step B docs: PASSED (20 files). Step C gate: PASSED (logged below). Next: M1 Foundation.
+- M1 Foundation: PASSED (server 57/57, client build+test green). M2 Demo bootstrap: PASSED (server 69/69
+  green, m2-gate3.log). Next: M3 ingestion + visual (no MODEL_API_KEY → probe NOT_RUN, FALLBACK).
 - MODEL_API_KEY is EMPTY: every AI component runs in FALLBACK mode. LIVE was not tested.
 
 ## Feature matrix
@@ -19,8 +21,8 @@ Columns: REQ(doc) ARCH DOCS | SRV CLI API | UNIT INT E2E NEG | SEC PERF ACC — 
 
 | Feature | Docs | Server | Client | Tests | Status |
 |---|---|---|---|---|---|
-| M1 foundation (profiles, security, utils) | PROJECT_OVERVIEW..PROGRESS_TRACKER | NOT_STARTED | NOT_STARTED | NOT_STARTED | NOT_STARTED |
-| M2 demo bootstrap (seeder, PDFs, font) | §5 restated in REQUIREMENTS | NOT_STARTED | — | NOT_STARTED | NOT_STARTED |
+| M1 foundation (profiles, security, utils) | PROJECT_OVERVIEW..PROGRESS_TRACKER | PASSED | PASSED | 57/57 + client smoke | PASSED |
+| M2 demo bootstrap (seeder, PDFs, font) | §5 restated in REQUIREMENTS | PASSED | — | 12/12 new, 69/69 total | PASSED |
 | M3 ingestion + visual | DOCUMENT_PROCESSING_PIPELINE, AI_INTEGRATION | NOT_STARTED | — | TC-ING/VIS NOT_STARTED | NOT_STARTED |
 | M4 AI extraction | AI_INTEGRATION | NOT_STARTED | — | TC-AI/QTE/GEN/SEC-01 NOT_STARTED | NOT_STARTED |
 | M5 compliance core | COMPLIANCE_ENGINE | NOT_STARTED | — | golden+INV written FIRST | NOT_STARTED |
@@ -66,7 +68,14 @@ PASSED 2026-11-04. Cross-checked all 20 docs against each other and MASTER_PROMP
 | Step A | PASSED | docs/test-logs/env-* | (with docs commit) |
 | Step B+C docs + gate | PASSED | 20 docs + this log | (docs commit) |
 | M1 Foundation | PASSED | server 57/57 green (m1-gate-green.log), client build+test green | (M1 commit) |
-| M2..M9 | NOT_STARTED | | |
+| M2 Demo bootstrap | PASSED | server 69/69 green (m2-gate3.log, MVN_EXIT 0): 6/2/2-page PDFs, golden clauses, §5 seed, idempotent | (M2 commit) |
+| M3..M9 | NOT_STARTED | | |
+
+M2 failure-fix loop (all fixed, none in tests' ground truth): (1) Hibernate validate rejected
+company_documents.sha256 VARCHAR mapping — V1 DDL is CHAR(64); entity fixed to CHAR(64). V1 already
+defines the full M2 schema (no V2 migration needed). (2) StorageService dual constructors confused
+Spring DI — @Autowired added to the primary. (3) Generator-test phrase assertions broke on layout
+line-wraps — test now collapses whitespace (content check, TC-ING-03).
 
 ## Sandbox build mechanics (this session only; user scripts run plain mvn/npm)
 

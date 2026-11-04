@@ -1,0 +1,47 @@
+{
+  "tender": {
+    "reference": "SCCC/2026/RFP/001",
+    "estimatedValue": "600000000.0000",
+    "emd": "12000000.0000",
+    "fee": "50000.0000",
+    "deadline": "2026-12-15T17:00+05:30"
+  },
+  "v1": {
+    "verdicts": {"4.1": "PASS", "4.2": "PASS", "5.1": "FAIL", "6.1": "FAIL", "6.2": "UNKNOWN", "8.1": "PASS"},
+    "decision": "NO_BID",
+    "score": "40.00",
+    "risks": {"CRITICAL": 2, "HIGH": 1}
+  },
+  "v2": {
+    "verdicts": {"4.1": "PASS", "4.2": "PASS", "5.1": "PASS", "6.1": "PASS", "6.2": "UNKNOWN", "8.1": "PASS"},
+    "decision": "CONDITIONAL_BID",
+    "score": "80.00",
+    "delta": "40.00",
+    "risks": {"HIGH": 1}
+  },
+  "v3": {"decision": "BID", "score": "100.00"},
+  "emptyCompany": {"decision": "INSUFFICIENT_DATA", "score": "0.00"},
+  "variantB": {
+    "reference": "VB/2026/001",
+    "estimatedValue": "500000000.0000",
+    "deadline": "2026-12-20T17:00+05:30",
+    "verdicts": {"3.1": "FAIL", "3.2": "PASS", "3.3": "PASS", "3.4": "PASS"},
+    "decision": "NO_BID",
+    "score": "75.00",
+    "risks": {"CRITICAL": 1}
+  },
+  "visual": {
+    "table4A": {
+      "page": 3,
+      "rows": 4,
+      "cols": 2,
+      "cells": [
+        ["Financial Year", "Period"],
+        ["FY 2023-24", "01-Apr-2023 to 31-Mar-2024"],
+        ["FY 2024-25", "01-Apr-2024 to 31-Mar-2025"],
+        ["FY 2025-26", "01-Apr-2025 to 31-Mar-2026"]
+      ]
+    },
+    "stampText": "MSDC DEMO SEAL"
+  }
+}
