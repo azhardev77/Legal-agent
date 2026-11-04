@@ -13,7 +13,8 @@ data/storage). After context loss: re-read MASTER_PROMPT.md + this file.
 - Step B docs: PASSED (20 files). Step C gate: PASSED (logged below). Next: M1 Foundation.
 - M1 Foundation: PASSED (server 57/57, client build+test green). M2 Demo bootstrap: PASSED (server 69/69
   green, m2-gate3.log). M3 ingestion + visual: PASSED (server 97/97, m3-gate8.log; probe NOT_RUN,
-  FALLBACK). Next: M4 AI extraction (Muse adapter + doubles, quote verification, fallback extractor).
+  FALLBACK). M4 AI extraction: PASSED (server 142/142, m4-gate5.log). Next: M5 compliance core
+  (golden + invariant tests FIRST, then engines).
 - MODEL_API_KEY is EMPTY: every AI component runs in FALLBACK mode. LIVE was not tested.
 
 ## Feature matrix
@@ -25,6 +26,7 @@ Columns: REQ(doc) ARCH DOCS | SRV CLI API | UNIT INT E2E NEG | SEC PERF ACC — 
 | M1 foundation (profiles, security, utils) | PROJECT_OVERVIEW..PROGRESS_TRACKER | PASSED | PASSED | 57/57 + client smoke | PASSED |
 | M2 demo bootstrap (seeder, PDFs, font) | §5 restated in REQUIREMENTS | PASSED | — | 12/12 new, 69/69 total | PASSED |
 | M3 ingestion + visual | DOCUMENT_PROCESSING_PIPELINE, AI_INTEGRATION | PASSED | — | TC-ING/VIS, 97/97 total | PASSED |
+| M4 AI extraction | AI_INTEGRATION, DOCUMENT_PROCESSING_PIPELINE | PASSED | — | TC-AI/QTE/GEN/SEC-extract, 142/142 total | PASSED |
 | M4 AI extraction | AI_INTEGRATION | NOT_STARTED | — | TC-AI/QTE/GEN/SEC-01 NOT_STARTED | NOT_STARTED |
 | M5 compliance core | COMPLIANCE_ENGINE | NOT_STARTED | — | golden+INV written FIRST | NOT_STARTED |
 | M6 workflows/realtime/amend/agent/report | REALTIME_DESIGN, API_SPEC | NOT_STARTED | — | TC-AMD/AGT/RPT/JOB/RT/E2E NOT_STARTED | NOT_STARTED |
@@ -71,7 +73,22 @@ PASSED 2026-11-04. Cross-checked all 20 docs against each other and MASTER_PROMP
 | M1 Foundation | PASSED | server 57/57 green (m1-gate-green.log), client build+test green | (M1 commit) |
 | M2 Demo bootstrap | PASSED | server 69/69 green (m2-gate3.log, MVN_EXIT 0): 6/2/2-page PDFs, golden clauses, §5 seed, idempotent | (M2 commit) |
 | M3 Ingestion + visual | PASSED | server 97/97 green (m3-gate8.log, MVN_EXIT 0): TC-ING-*, TC-VIS-01..08/11; probe NOT_RUN (no key) | (M3 commit) |
-| M4..M9 | NOT_STARTED | | |
+| M4 AI extraction | PASSED | server 142/142 green (m4-gate5.log, MVN_EXIT 0): TC-AI-*, TC-QTE-01, TC-GEN-01/SEC-01 extraction halves, TC-VIS-10 | (M4 commit) |
+| M5..M9 | NOT_STARTED | | |
+
+M4 failure-fix loop: (1) SAM transport refactor reintroduced dual-constructor DI ambiguity
+→ @Autowired on the 4-arg constructor. (2) Fallback operator cues broke on extraction
+line-wraps inside cue phrases ("not\nless than" matched LTE "less than") → collapse
+whitespace before cue matching. (3) Grounding regex missed bare "Cr" unit + trailing-dot
+tokens ("2026.") → unit added, trailing dots stripped. (4) Live-double page routing regex
+missed JSON-escaped quotes (page=\"3\") → optional backslash. (5) Fallback dropped foreign
+currency markers (captured "100 Cr" from "USD 100 Cr") → currency prefixes in the amount
+pattern, service downgrades non-INR to OTHER (R15). (6) QuoteVerifierTest expectations kept
+trailing periods outside the model quote (test bug, fixed to exact spans).
+M4→M5 carryovers: TC-GEN-01 verdict half (pipeline golden on Variant B), TC-SEC-01 verdict
+half (injected vs clean verdict equality), TC-VIS-08 NEEDS_REVIEW routing (engine rule:
+unverified/vision quotes + null confidence → NEEDS_REVIEW), tree-leaf amount conversion at
+eval time, composite top-level metric OTHER + tree precedence.
 
 M3 failure-fix loop: (1) PDFBox 3 bare PDFStreamEngine registers NO state operators → vector
 scans track own graphics state/CTM (else color/width/CTM silently default). (2) YDirAdj is

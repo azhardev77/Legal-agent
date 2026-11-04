@@ -2,6 +2,7 @@ package com.tenderops.common;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,7 +14,7 @@ public final class MoneyUtils {
 
   private static final BigDecimal CRORE = new BigDecimal("10000000");
   private static final BigDecimal LAKH = new BigDecimal("100000");
-  private static final String RUPEE = "\u20B9";
+  private static final String RUPEE = String.valueOf((char) 0x20B9);
   private static final Pattern UNIT_SUFFIX =
       Pattern.compile("(?i)\\s*(crores?|cr|lakhs?|lacs?)\\.?\\s*$");
   private static final Pattern PREFIX =
@@ -50,6 +51,30 @@ public final class MoneyUtils {
       throw new MoneyParseException("Unparseable amount text: '" + text + "'");
     }
     return new BigDecimal(s).multiply(multiplier).setScale(4, RoundingMode.HALF_UP);
+  }
+
+  /**
+   * Currency signal in raw amount text (R15, TC-CUR-01). INR unless a foreign marker
+   * ($/USD, euro, GBP) is present. Pure code-point checks (no non-ASCII literals).
+   */
+  public static String currencyOf(String text) {
+    if (text == null) {
+      return "INR";
+    }
+    boolean dollar = text.indexOf('$') >= 0;
+    boolean euroSign = text.codePoints().anyMatch(c -> c == 0x20AC);
+    boolean poundSign = text.codePoints().anyMatch(c -> c == 0x00A3);
+    String upper = " " + text.toUpperCase(Locale.ROOT) + " ";
+    if (dollar || upper.contains(" USD ") || upper.contains(" US DOLLAR")) {
+      return "USD";
+    }
+    if (euroSign || upper.contains(" EUR ") || upper.contains(" EURO")) {
+      return "EUR";
+    }
+    if (poundSign || upper.contains(" GBP ") || upper.contains(" POUND")) {
+      return "GBP";
+    }
+    return "INR";
   }
 
   /** Storage/display scale (R1): scale 4, HALF_UP. */
