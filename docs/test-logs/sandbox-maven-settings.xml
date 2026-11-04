@@ -1,0 +1,6 @@
+﻿<settings>
+  <proxies>
+    <proxy><id>sandbox-http</id><active>true</active><protocol>http</protocol><host>127.0.0.1</host><port>51910</port><nonProxyHosts>localhost</nonProxyHosts></proxy>
+    <proxy><id>sandbox-https</id><active>true</active><protocol>https</protocol><host>127.0.0.1</host><port>51910</port><nonProxyHosts>localhost</nonProxyHosts></proxy>
+  </proxies>
+</settings>

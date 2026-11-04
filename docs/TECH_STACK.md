@@ -26,6 +26,9 @@ Decisions:
 - JSON columns stored as TEXT via Jackson AttributeConverter (works identically on H2 and PostgreSQL;
   avoids jsonb/H2-JSON dialect split). Single decision, documented here.
 - No testcontainers: H2 covers `mvn clean test`; the postgres profile is tested only if a Docker daemon exists.
+- maven-surefire-plugin is pinned to 3.5.6 instead of Spring Boot 3.4.3's default 3.5.2, because the
+  offline sandbox dependency cache only holds complete surefire artifacts for 3.2.5/3.5.6 (3.5.2's
+  maven-surefire-common jar is absent). Same test behavior; documented here per the no-unneeded-tech rule.
 - No Spring resource-server: jjwt keeps JWT logic explicit and small.
 
 ## Client (client/)

@@ -7,9 +7,13 @@ data/storage/
 # Node
 node_modules/
 dist/
+# Sandbox-only project-local npm cache (cross-user default cache is not writable here)
+.npm-cache/
 
 # Java/Maven
 target/
+# Sandbox-only project-local Maven repo (pre-seeded cache copy; users run plain mvn)
+.m2repo/
 
 # Logs
 *.log

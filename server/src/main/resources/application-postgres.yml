@@ -1,0 +1,19 @@
+# Postgres profile (PostgreSQL 17 via compose). Requires JWT_SECRET (R9, TC-SEC-07).
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/tenderops}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER:tenderops}
+    password: ${DB_PASSWORD:tenderops}
+
+tenderops:
+  jwt:
+    secret: ${JWT_SECRET:}
+  seeder:
+    enabled: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

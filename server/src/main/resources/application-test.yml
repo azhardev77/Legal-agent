@@ -1,0 +1,20 @@
+# Test profile: H2 mem, seeder OFF (tests invoke it explicitly), temp storage, tight login bucket.
+tenderops:
+  seeder:
+    enabled: false
+  storage-dir: ${java.io.tmpdir}/tenderops-test-storage
+  rate-limit:
+    login-per-minute: 5
+    register-per-minute: 60
+    upload-per-minute: 60
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    com.tenderops: WARN
+    org.hibernate.SQL: WARN

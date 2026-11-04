@@ -1,0 +1,15 @@
+# Dev profile: H2 + seeder + API docs. Same datasource as default.
+tenderops:
+  seeder:
+    enabled: true
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    com.tenderops: INFO
+    org.hibernate.SQL: WARN

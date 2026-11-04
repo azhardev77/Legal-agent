@@ -44,6 +44,20 @@ PASSED 2026-11-04. Cross-checked all 20 docs against each other and MASTER_PROMP
   pdfbox 3.0.4 (200 OK). No version-substitution risk.
 - Sections 2/5/6 never relaxed. Proceeding to M1 automatically per gate rule.
 
+## Build-hygiene notes (tooling lessons, not product behavior)
+
+- Byte-exactness: file transports are byte-exact, but the author's emission of backslash runs,
+  unicode escapes and long random strings is untrustworthy (MoneyUtils RUPEE arrived as ESC[H;
+  the .ps1 PNG blob arrived as a bracketed marker while rendered output misleadingly showed a full
+  blob). Protocol: Java/needs-escape content uses ASCII marker tokens + python chr()-based
+  replacement; every such file is asserted by docs/test-logs/verify_bytes.py (exit 0 required);
+  long random strings are length/charset-guarded, never trusted from rendered output.
+- Bracketed tokens (e.g. [BASE64_..._1]) may render expanded in tool output: trust ordinals/lengths.
+- write_file can spuriously fail with "already exists" (os 183); retry succeeds. Verify batch file
+  presence after each write batch.
+- Banned grep tokens (H2/CL-04 exact strings) must never appear in authored files; MASTER_PROMPT.md
+  keeps them verbatim and is excluded from the M9 grep with this documented reason.
+
 ## Milestone log
 
 | Milestone | Result | Evidence | Commit |
@@ -51,4 +65,24 @@ PASSED 2026-11-04. Cross-checked all 20 docs against each other and MASTER_PROMP
 | Bootstrap | PASSED | initial commit | d926134 |
 | Step A | PASSED | docs/test-logs/env-* | (with docs commit) |
 | Step B+C docs + gate | PASSED | 20 docs + this log | (docs commit) |
-| M1..M9 | NOT_STARTED | | |
+| M1 Foundation | PASSED | server 57/57 green (m1-gate-green.log), client build+test green | (M1 commit) |
+| M2..M9 | NOT_STARTED | | |
+
+## Sandbox build mechanics (this session only; user scripts run plain mvn/npm)
+
+- Shell runs as `muse-sbx-r1`; repo lives under `C:\Users\white\...`. Sandboxed java.exe CANNOT
+  canonicalize (toRealPath) or ZipFS-close jars there, and cannot use sockets at all; esbuild cannot
+  read parent dirs. Consequence: ALL `mvn`/`npm run build`/`npm test` commands in this session must
+  run with `require_escalated` (auto-approved here), else they fail for sandbox reasons, not code reasons.
+- Maven is fully offline: `-o "-Dmaven.repo.local=<P>\.m2repo"` (quotes REQUIRED for -D key=value args;
+  unquoted -D is silently dropped). `.m2repo` = copy of the pre-seeded `~/.m2` cache minus broken
+  `_remote.repositories` tracking, plus regenerated installed-form markers; gitignored.
+- Direct Maven network is denied; the sandbox proxy port rotates per shell invocation, so no static
+  proxy config is viable. Current flags are deterministic and offline.
+- npm needs per-command proxy env (`npm_config_proxy/https_proxy` from `$env:HTTPS_PROXY`) plus a
+  project-local cache (`--cache <P>\.npm-cache`, gitignored). package-lock.json IS committed (ci needs it).
+- Dependency pins forced by offline-cache gaps (documented in pom + TECH_STACK.md): surefire 3.5.6
+  (Boot's 3.5.2 lacks maven-surefire-common), JUnit 5.12.2 (cache lacks platform-launcher 1.11.4).
+- Flyway V1 uses `TIMESTAMP WITH TIME ZONE` (H2 has no TIMESTAMPTZ type, even in PG mode).
+- A concurrent process (likely an IDE as another user) also compiles into server/target; escalated
+  `clean` wins deterministically. Evidence: docs/test-logs/m1-*.log, hello/ probes.

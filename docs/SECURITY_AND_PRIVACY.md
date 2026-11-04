@@ -24,6 +24,22 @@
   (TC-SEC-01). Model output is untrusted: schema-validated, quotes re-verified, amounts re-parsed, confidence
   range-checked.
 
+## Hardening notes (threat-model review, M1)
+
+- JWT role staleness: role changes take effect on next login (role rides the JWT). Sensitive actions
+  (human approval) re-validate the role from the database instead of trusting the claim (implemented at M6).
+- Register always creates BID_MANAGER; the role is never client-settable (no self-promotion). An ADMIN
+  cannot change their own role (no accidental lockout).
+- Login failures return a uniform 401 (no user enumeration). Register returns 409 for a taken email,
+  which inherently reveals registration; accepted standard tradeoff, documented here.
+- Rate buckets: login keyed by IP+email (counts failures too, checked before password verification);
+  register keyed by IP after schema validation (malformed requests are cheap and uncounted).
+  In-memory buckets are correct for a single instance (this deployment); multi-instance would need a
+  shared store.
+- Uploads (M3/M6): MIME allowlist + magic bytes + size/page caps + SHA-256 storage names; no path traversal.
+- LLM output is untrusted input: schema-validated, quotes re-verified against raw text, amounts re-parsed,
+  confidence range-checked; never into SQL/shell/paths (see AI_INTEGRATION.md sandboxing).
+
 ## Abuse controls
 
 - In-memory token-bucket rate limits on login/register/upload (TC-SEC-04).

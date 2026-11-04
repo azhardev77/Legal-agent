@@ -1,0 +1,6 @@
+probe line1 backslash-s: [X\\sY]
+probe line2 single-backslash-d: [X\dY]
+probe line3 double-backslash-u: [X\\u20B9Y]
+probe line4 java-regex-digits: Pattern.compile("\\d+(\\.\\d+)?");
+probe line5 tab-escape: [A\tB]
+probe line6 newline-escape-in-text: [A\nB]

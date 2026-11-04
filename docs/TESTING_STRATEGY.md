@@ -4,7 +4,7 @@
 
 - No claim without a run test seen passing. Every report number comes from a real command; raw logs in
   `docs/test-logs/`.
-- Never tune tests to code output; never delete/skip/@Disabled/weaken; never `-DskipTests`. Skipped = 0.
+- Never tune tests to code output; never delete/skip/disable/weaken tests, and never pass Maven test-skipping flags. Skipped = 0.
 - Test doubles (JDK HttpServer) live only in `src/test`, named as doubles; they NEVER produce LIVE aiMode.
 - Ground-truth JSON is read only by tests, never by `src/main` (CL-23 greps + review).
 - Fixed Clock `2026-11-04T10:00+05:30` (Asia/Kolkata) for ALL golden tests (R8).

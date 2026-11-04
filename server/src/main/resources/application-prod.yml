@@ -1,0 +1,28 @@
+# Prod profile: postgres, seeder OFF, docs OFF, JWT secret REQUIRED (R9, TC-SEC-07).
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/tenderops}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER:tenderops}
+    password: ${DB_PASSWORD:tenderops}
+  h2:
+    console:
+      enabled: false
+
+tenderops:
+  jwt:
+    secret: ${JWT_SECRET:}
+  seeder:
+    enabled: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

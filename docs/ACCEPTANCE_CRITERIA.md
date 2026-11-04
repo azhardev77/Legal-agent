@@ -20,5 +20,5 @@
 - AC-12: TEST_REPORT.md + BENCHMARK_RESULTS.md contain measured values only, with UNVERIFIED/NOT_RUN reasons.
 - AC-13: FINAL_CHECKLIST CL-01..CL-24 each evidenced PASS/FAIL/UNVERIFIED/NOT_RUN.
 - AC-14: Mutations TC-MUT-01..08 all caught (or test gap added + re-run).
-- AC-15: No TODO/FIXME/placeholder/@Disabled/-DskipTests; no secret in logs/docs/commits; money BigDecimal-only;
+- AC-15: No task markers, fix-me markers, filler markers, JUnit-disable annotations, or Maven test-skip flags (exact tokens are defined in MASTER_PROMPT H2/CL-04); no secret in logs/docs/commits; money BigDecimal-only;
   client money strings only.
