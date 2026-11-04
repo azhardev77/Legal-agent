@@ -18,7 +18,10 @@ Each stage is transactional per unit of work; events persist in the same transac
 
 1. `Loader.loadPDF`, per page extract text position-sorted (custom `PDFTextStripper` with
    `setSortByPosition(true)`), recording word boxes (PDFBox bottom-left points → normalized top-left [0,1]
-   via `CoordinateUtils`, rotation-aware; TC-ING-05).
+   via `CoordinateUtils`, rotation-aware; TC-ING-05). Verified M3: `TextPosition.getYDirAdj()` is
+   TOP-origin in unrotated user space at every page rotation, so the extractor flips it back
+   (`PdfWordBoxExtractor`); vector scans track their own graphics state/CTM because PDFBox 3's bare
+   `PDFStreamEngine` registers no state operators.
 2. Classifier per page (in order):
    - embedded image covering > 60% of page area → SCANNED (or MIXED if extractable chars ≥ 50);
    - else extractable chars < 50 → SCANNED;
@@ -37,7 +40,7 @@ Each stage is transactional per unit of work; events persist in the same transac
 1. Candidate pages: pages with images, signature/annexure keywords, or table-like layout (ruling lines).
    Non-candidate pages skip SAM calls (cost control) but still run the cheap geometric table scan.
 2. For each (candidate page × prompt) with prompts `circular official stamp`, `handwritten signature`, `table`:
-   - LIVE (key + `sam.*` enabled): `Sam31Detector` → parse grammar → scale boxes (pixels → normalized) → regions.
+   - LIVE (key present): `Sam31Detector` → parse grammar → scale boxes (pixels → normalized) → regions.
    - Else/failure: `GeometricFallbackDetector` (§AI_INTEGRATION 3.5) → regions with FALLBACK_HEURISTIC.
 3. Discard area > 40% (TC-VIS-11). Persist regions; emit REGION_DETECTED each.
 4. Content extraction (§3.4): for OFFICIAL_STAMP + TABLE_REGION: crop (+2% padding) → store → region text /

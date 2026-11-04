@@ -12,7 +12,8 @@ data/storage). After context loss: re-read MASTER_PROMPT.md + this file.
   DOWN; MODEL_API_KEY EMPTY → FALLBACK mode; evidence docs/test-logs/env-*).
 - Step B docs: PASSED (20 files). Step C gate: PASSED (logged below). Next: M1 Foundation.
 - M1 Foundation: PASSED (server 57/57, client build+test green). M2 Demo bootstrap: PASSED (server 69/69
-  green, m2-gate3.log). Next: M3 ingestion + visual (no MODEL_API_KEY → probe NOT_RUN, FALLBACK).
+  green, m2-gate3.log). M3 ingestion + visual: PASSED (server 97/97, m3-gate8.log; probe NOT_RUN,
+  FALLBACK). Next: M4 AI extraction (Muse adapter + doubles, quote verification, fallback extractor).
 - MODEL_API_KEY is EMPTY: every AI component runs in FALLBACK mode. LIVE was not tested.
 
 ## Feature matrix
@@ -23,7 +24,7 @@ Columns: REQ(doc) ARCH DOCS | SRV CLI API | UNIT INT E2E NEG | SEC PERF ACC — 
 |---|---|---|---|---|---|
 | M1 foundation (profiles, security, utils) | PROJECT_OVERVIEW..PROGRESS_TRACKER | PASSED | PASSED | 57/57 + client smoke | PASSED |
 | M2 demo bootstrap (seeder, PDFs, font) | §5 restated in REQUIREMENTS | PASSED | — | 12/12 new, 69/69 total | PASSED |
-| M3 ingestion + visual | DOCUMENT_PROCESSING_PIPELINE, AI_INTEGRATION | NOT_STARTED | — | TC-ING/VIS NOT_STARTED | NOT_STARTED |
+| M3 ingestion + visual | DOCUMENT_PROCESSING_PIPELINE, AI_INTEGRATION | PASSED | — | TC-ING/VIS, 97/97 total | PASSED |
 | M4 AI extraction | AI_INTEGRATION | NOT_STARTED | — | TC-AI/QTE/GEN/SEC-01 NOT_STARTED | NOT_STARTED |
 | M5 compliance core | COMPLIANCE_ENGINE | NOT_STARTED | — | golden+INV written FIRST | NOT_STARTED |
 | M6 workflows/realtime/amend/agent/report | REALTIME_DESIGN, API_SPEC | NOT_STARTED | — | TC-AMD/AGT/RPT/JOB/RT/E2E NOT_STARTED | NOT_STARTED |
@@ -69,7 +70,19 @@ PASSED 2026-11-04. Cross-checked all 20 docs against each other and MASTER_PROMP
 | Step B+C docs + gate | PASSED | 20 docs + this log | (docs commit) |
 | M1 Foundation | PASSED | server 57/57 green (m1-gate-green.log), client build+test green | (M1 commit) |
 | M2 Demo bootstrap | PASSED | server 69/69 green (m2-gate3.log, MVN_EXIT 0): 6/2/2-page PDFs, golden clauses, §5 seed, idempotent | (M2 commit) |
-| M3..M9 | NOT_STARTED | | |
+| M3 Ingestion + visual | PASSED | server 97/97 green (m3-gate8.log, MVN_EXIT 0): TC-ING-*, TC-VIS-01..08/11; probe NOT_RUN (no key) | (M3 commit) |
+| M4..M9 | NOT_STARTED | | |
+
+M3 failure-fix loop: (1) PDFBox 3 bare PDFStreamEngine registers NO state operators → vector
+scans track own graphics state/CTM (else color/width/CTM silently default). (2) YDirAdj is
+TOP-origin unrotated space at every rotation (bytecode + probes) → extractor flips to
+bottom-left. (3) M1 tamper tests flipped the JWT's LAST char — a silent no-op when only dropped
+base64 padding bits change (403 flake) → flip first signature char instead. (4) SAM test:
+@DynamicPropertySource evaluates before @BeforeAll → HttpServer double in static init.
+(5) python `open(f,'wb').write(open(f,'rb')...)` truncates before reading — destroyed 3 test
+files, rewrote from authored content; NEVER use write+read in one expression.
+M3→M4 carryovers: TC-VIS-08 requirement-routing half, TC-VIS-10 (Table 4-A zero requirements),
+TC-VIS-09 client half (M7). SAM grammar stays provisional/UNVERIFIED until a live probe.
 
 M2 failure-fix loop (all fixed, none in tests' ground truth): (1) Hibernate validate rejected
 company_documents.sha256 VARCHAR mapping — V1 DDL is CHAR(64); entity fixed to CHAR(64). V1 already

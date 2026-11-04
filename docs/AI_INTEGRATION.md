@@ -32,6 +32,10 @@ NOT RUN — `MODEL_API_KEY` is empty in this environment (recorded 2026-11-04). 
 `scripts/probe-meta-api` (≤10 minimal calls, shapes per §3) at the START of M3 and paste the redacted
 transcript here with: path, status, redacted response shape, latency, capability yes/no. Never log the key.
 
+M3 START (2026-11-04): key still empty → L1 probe NOT_RUN again. Adapters built to the §3
+docs-verified shapes and exercised against JDK HttpServer test doubles; every run records
+aiMode=FALLBACK per component. LIVE conformance stays open until a key exists (RSK-REG-01).
+
 ## 3. Adapter design (config-driven, L2)
 
 All URLs/paths/model ids/timeouts live in `application.yml` under `tenderops.meta-api.*`; capability flags
@@ -76,11 +80,14 @@ General clause-pattern parser (never reads golden/expected data):
   (unvalidated heuristic, never a probability).
 
 ### 3.5 VisualRegionDetector fallback — GeometricFallbackDetector
-Heuristics on the rendered page + PDFBox vector content (never reads generator ground truth):
-- Stamp: largest compact connected component of non-black colored pixels (distinct hue) with near-circular
-  bounding shape → OFFICIAL_STAMP, confidence 0.60.
-- Signature: dark-stroke connected component within a radius below/right of a "Signature" text label
-  (label located via PDFBox text positions) → HANDWRITTEN_SIGNATURE, confidence 0.55.
+Heuristics on PDFBox vector content + word positions (never reads generator ground truth).
+REVISION at M3 (reason: the tender pages are vector drawings; vector analysis is deterministic,
+resolution-independent and needs no render pass, while raster blobs add threshold fragility):
+- Stamp: groups of overlapping COLORED near-circular curved paths (channel spread ≥ 0.20,
+  25–320pt, aspect 0.55–1.8) → OFFICIAL_STAMP, confidence 0.60.
+- Signature: thin (≤2.2pt) wavy (control-polygon/diagonal ≥ 1.3) dark curved strokes within
+  150pt of a case-insensitive "signat*" label (located via PDFBox word boxes), merged with
+  same-ink straight strokes ≤45pt away plus the label box → HANDWRITTEN_SIGNATURE, 0.55.
 - Table: clusters of horizontal + vertical ruling lines forming a grid (vector line segments via PDFBox
   graphic operations) → TABLE_REGION bounding the grid, confidence 0.65.
 - `source=FALLBACK_HEURISTIC`, reduced confidence; area > 40% discarded (TC-VIS-11).

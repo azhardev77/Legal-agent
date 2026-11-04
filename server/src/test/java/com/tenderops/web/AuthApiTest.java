@@ -140,8 +140,12 @@ class AuthApiTest {
   void tamperedTokenIs401() {
     String email = freshEmail("tamper-");
     String token = register(email, "password-123", "Tamper Co").accessToken();
-    char last = token.charAt(token.length() - 1);
-    String tampered = token.substring(0, token.length() - 1) + (last == 'a' ? 'b' : 'a');
+    // Flip the FIRST signature char: all 6 bits significant, so the tamper always lands.
+    // (Flipping the LAST char is a silent no-op whenever only dropped padding bits change.)
+    int sigStart = token.lastIndexOf('.') + 1;
+    char first = token.charAt(sigStart);
+    String tampered = token.substring(0, sigStart) + (first == 'a' ? 'b' : 'a')
+        + token.substring(sigStart + 1);
     HttpHeaders headers = new HttpHeaders();
     headers.setBearerAuth(tampered);
     ResponseEntity<Map> response =

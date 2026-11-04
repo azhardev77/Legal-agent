@@ -2,6 +2,7 @@ package com.tenderops.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.within;
 
 import com.tenderops.common.CoordinateUtils.NormalizedBox;
 import java.math.BigDecimal;
@@ -69,5 +70,20 @@ class CoordinateUtilsTest {
   void unsupportedRotationThrows() {
     assertThatThrownBy(() -> CoordinateUtils.pdfBoxToNormalized(0, 0, 10, 10, 612, 792, 45))
         .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  void inverseMappingRoundTripsForAllRotations() {
+    for (int rotation : new int[] {0, 90, 180, 270}) {
+      NormalizedBox box =
+          CoordinateUtils.pdfBoxToNormalized(100, 200, 150, 80, 612, 792, rotation);
+      double[] back = CoordinateUtils.normalizedToPdfBox(box.x0().doubleValue(),
+          box.y0().doubleValue(), box.x1().doubleValue(), box.y1().doubleValue(), 612,
+          792, rotation);
+      assertThat(back[0]).isCloseTo(100.0, within(0.01));
+      assertThat(back[1]).isCloseTo(200.0, within(0.01));
+      assertThat(back[2]).isCloseTo(250.0, within(0.01));
+      assertThat(back[3]).isCloseTo(280.0, within(0.01));
+    }
   }
 }

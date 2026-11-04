@@ -56,4 +56,48 @@ public final class CoordinateUtils {
     double clamped = Math.min(1.0, Math.max(0.0, v));
     return BigDecimal.valueOf(clamped).setScale(6, RoundingMode.HALF_UP);
   }
+
+  /**
+   * Inverse of {@link #pdfBoxToNormalized}: normalized top-left box back to unrotated
+   * user-space points (bottom-left origin). Returns {x0, y0, x1, y1}.
+   */
+  public static double[] normalizedToPdfBox(double nx0, double ny0, double nx1, double ny1,
+      double pageW, double pageH, int rotation) {
+    int r = ((rotation % 360) + 360) % 360;
+    if (r != 0 && r != 90 && r != 180 && r != 270) {
+      throw new IllegalArgumentException("Unsupported rotation: " + rotation);
+    }
+    double renderedW = (r == 90 || r == 270) ? pageH : pageW;
+    double renderedH = (r == 90 || r == 270) ? pageW : pageH;
+    double[][] corners = new double[4][2];
+    double[] nxs = {nx0, nx1};
+    double[] nys = {ny0, ny1};
+    int k = 0;
+    for (double nx : nxs) {
+      for (double ny : nys) {
+        double rx = nx * renderedW;
+        double ry = (1.0 - ny) * renderedH;
+        double px;
+        double py;
+        switch (r) {
+          case 90 -> { px = ry; py = pageH - rx; }
+          case 180 -> { px = pageW - rx; py = pageH - ry; }
+          case 270 -> { px = pageW - ry; py = rx; }
+          default -> { px = rx; py = ry; }
+        }
+        corners[k][0] = px;
+        corners[k][1] = py;
+        k++;
+      }
+    }
+    double x0 = Math.min(Math.min(corners[0][0], corners[1][0]),
+        Math.min(corners[2][0], corners[3][0]));
+    double y0 = Math.min(Math.min(corners[0][1], corners[1][1]),
+        Math.min(corners[2][1], corners[3][1]));
+    double x1 = Math.max(Math.max(corners[0][0], corners[1][0]),
+        Math.max(corners[2][0], corners[3][0]));
+    double y1 = Math.max(Math.max(corners[0][1], corners[1][1]),
+        Math.max(corners[2][1], corners[3][1]));
+    return new double[] {x0, y0, x1, y1};
+  }
 }
