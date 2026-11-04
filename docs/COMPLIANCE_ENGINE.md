@@ -118,3 +118,20 @@ empty company 0.00.
 - Executive summary: Muse strictly from structured verified facts; Java grounding check (every number/amount/
   date must appear in input facts after canonicalization) else groundingWarning. Fallback: template summary
   labelled FALLBACK.
+
+## 14. M5 implementation notes (spec-silent edges, pinned by tests)
+
+- Null value fields (turnover, net worth, solvency amount) mean missing evidence
+  and yield UNKNOWN, never FAIL or PASS.
+- A project with a missing contract value, a non-INR currency, or (when windowed)
+  a missing completion date caps its requirement at NEEDS_REVIEW
+  (INCOMPLETE_PROJECT_EVIDENCE); status/domain mismatches exclude silently.
+- Currency is checked where amounts are compared (financial, project, solvency);
+  CERTIFICATE_VALID compares no amounts.
+- A missing submission deadline yields NEEDS_REVIEW (DEADLINE_MISSING) for every
+  requirement; a missing estimated value yields UNKNOWN only for 80/50/40 leaves.
+- Tree evidence links the decisive branches (passing branches of a passing OR,
+  failing branches of a failing AND, all branches otherwise).
+- Zero mandatory requirements score 0.00 and decide INSUFFICIENT_DATA.
+- Requirement gates run before leaf evaluation in this order: confidence, quote
+  verification, deadline, currency, then tree-or-leaf dispatch.

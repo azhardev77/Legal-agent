@@ -13,8 +13,9 @@ data/storage). After context loss: re-read MASTER_PROMPT.md + this file.
 - Step B docs: PASSED (20 files). Step C gate: PASSED (logged below). Next: M1 Foundation.
 - M1 Foundation: PASSED (server 57/57, client build+test green). M2 Demo bootstrap: PASSED (server 69/69
   green, m2-gate3.log). M3 ingestion + visual: PASSED (server 97/97, m3-gate8.log; probe NOT_RUN,
-  FALLBACK). M4 AI extraction: PASSED (server 142/142, m4-gate5.log). Next: M5 compliance core
-  (golden + invariant tests FIRST, then engines).
+  FALLBACK). M4 AI extraction: PASSED (server 142/142, m4-gate5.log). M5 compliance core: PASSED
+  (server 271/271, m5-gate5.log; 129 new compliance tests). Next: M6 workflows, realtime,
+  amendments, agent, reports.
 - MODEL_API_KEY is EMPTY: every AI component runs in FALLBACK mode. LIVE was not tested.
 
 ## Feature matrix
@@ -27,8 +28,7 @@ Columns: REQ(doc) ARCH DOCS | SRV CLI API | UNIT INT E2E NEG | SEC PERF ACC — 
 | M2 demo bootstrap (seeder, PDFs, font) | §5 restated in REQUIREMENTS | PASSED | — | 12/12 new, 69/69 total | PASSED |
 | M3 ingestion + visual | DOCUMENT_PROCESSING_PIPELINE, AI_INTEGRATION | PASSED | — | TC-ING/VIS, 97/97 total | PASSED |
 | M4 AI extraction | AI_INTEGRATION, DOCUMENT_PROCESSING_PIPELINE | PASSED | — | TC-AI/QTE/GEN/SEC-extract, 142/142 total | PASSED |
-| M4 AI extraction | AI_INTEGRATION | NOT_STARTED | — | TC-AI/QTE/GEN/SEC-01 NOT_STARTED | NOT_STARTED |
-| M5 compliance core | COMPLIANCE_ENGINE | NOT_STARTED | — | golden+INV written FIRST | NOT_STARTED |
+| M5 compliance core | COMPLIANCE_ENGINE §14 | PASSED | — | TC-MON/FIN/CUR/PRJ/CRT/LOG/DEC/SCR/TIME/RSK/INV, 271/271 total | PASSED |
 | M6 workflows/realtime/amend/agent/report | REALTIME_DESIGN, API_SPEC | NOT_STARTED | — | TC-AMD/AGT/RPT/JOB/RT/E2E NOT_STARTED | NOT_STARTED |
 | M7 client | FRONTEND_ARCHITECTURE | — | NOT_STARTED | component + RT-09/10/11 NOT_STARTED | NOT_STARTED |
 | M8 infra | DEPLOYMENT_GUIDE | NOT_STARTED | NOT_STARTED | E2E-02 attempt | NOT_STARTED |
@@ -74,7 +74,8 @@ PASSED 2026-11-04. Cross-checked all 20 docs against each other and MASTER_PROMP
 | M2 Demo bootstrap | PASSED | server 69/69 green (m2-gate3.log, MVN_EXIT 0): 6/2/2-page PDFs, golden clauses, §5 seed, idempotent | (M2 commit) |
 | M3 Ingestion + visual | PASSED | server 97/97 green (m3-gate8.log, MVN_EXIT 0): TC-ING-*, TC-VIS-01..08/11; probe NOT_RUN (no key) | (M3 commit) |
 | M4 AI extraction | PASSED | server 142/142 green (m4-gate5.log, MVN_EXIT 0): TC-AI-*, TC-QTE-01, TC-GEN-01/SEC-01 extraction halves, TC-VIS-10 | (M4 commit) |
-| M5..M9 | NOT_STARTED | | |
+| M5 Compliance core | PASSED | server 271/271 green (m5-gate5.log, MVN_EXIT 0): TC-MON/FIN/CUR/PRJ/CRT/LOG/DEC/SCR/TIME/RSK/INV + golden engine/pipeline + GEN-01/SEC-01 verdict halves | (M5 commit) |
+| M6..M9 | NOT_STARTED | | |
 
 M4 failure-fix loop: (1) SAM transport refactor reintroduced dual-constructor DI ambiguity
 → @Autowired on the 4-arg constructor. (2) Fallback operator cues broke on extraction
@@ -88,7 +89,18 @@ trailing periods outside the model quote (test bug, fixed to exact spans).
 M4→M5 carryovers: TC-GEN-01 verdict half (pipeline golden on Variant B), TC-SEC-01 verdict
 half (injected vs clean verdict equality), TC-VIS-08 NEEDS_REVIEW routing (engine rule:
 unverified/vision quotes + null confidence → NEEDS_REVIEW), tree-leaf amount conversion at
-eval time, composite top-level metric OTHER + tree precedence.
+eval time, composite top-level metric OTHER + tree precedence. ALL CLOSED in M5.
+
+M5 failure-fix loop (3 test bugs, all provably wrong vs §§5–6 ground truth, code was right):
+(1) AssertJ containsExactlyInAnyOrder on List<?> does not compile (varargs capture
+mismatch) → map elements to String first. (2) ConditionTreeTest orTable returned FAIL for
+OR(UNKNOWN,FAIL) and OR(NR,FAIL); §6.6 precedence (PASS > NR > UNKNOWN > FAIL) gives
+UNKNOWN and NEEDS_REVIEW → helper fixed. (3) GoldenPipelineTest expected BID after adding
+solvency on the v1 version, but v1 keeps 5.1/6.1 FAIL (golden v3 = v2 + solvency, and v2
+needs the M6 amendment merge) → test now pins 6.2 PASS, NO_BID, 60.00, hash change.
+M5→M6 carryovers: pipeline-level v3 BID (needs corrigendum merge); checklist +
+clarification-question generators (§6.12); run/result/risk/decision persistence;
+ComplianceService.evaluate + RequirementEvaluator are the M6 seams (TC-AMD-02 spy point).
 
 M3 failure-fix loop: (1) PDFBox 3 bare PDFStreamEngine registers NO state operators → vector
 scans track own graphics state/CTM (else color/width/CTM silently default). (2) YDirAdj is
