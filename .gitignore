@@ -1,0 +1,23 @@
+# Local secrets - never commit
+.env
+
+# Runtime storage
+data/storage/
+
+# Node
+node_modules/
+dist/
+
+# Java/Maven
+target/
+
+# Logs
+*.log
+docs/test-logs/*.tmp
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
