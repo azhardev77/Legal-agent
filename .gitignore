@@ -12,6 +12,8 @@ dist/
 
 # Java/Maven
 target/
+*.class
+*.jar
 # Sandbox-only project-local Maven repo (pre-seeded cache copy; users run plain mvn)
 .m2repo/
 
