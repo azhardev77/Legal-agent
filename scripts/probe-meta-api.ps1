@@ -52,9 +52,9 @@ function Invoke-Probe($name, $method, $url, $body) {
 Write-Probe ("probe start base=" + $apiBase + " time=" + (Get-Date -Format o))
 Invoke-Probe "models-list" "Get" ($apiBase + "/models") $null
 Invoke-Probe "muse-text" "Post" ($apiBase + "/responses") '{"model":"muse-spark-1.3","input":"Reply with the single word OK."}'
-Invoke-Probe "muse-structured" "Post" ($apiBase + "/responses") '{"model":"muse-spark-1.3","input":"Return JSON: {\"ok\": true}.","response_format":{"type":"json_object"}}'
-Invoke-Probe "muse-tools" "Post" ($apiBase + "/responses") '{"model":"muse-spark-1.3","input":"What is 2+2? Use the tool if available.","tools":[{"type":"function","name":"add","description":"Add two numbers","parameters":{"type":"object","properties":{"a":{"type":"number"},"b":{"type":"number"}}}}]}'
+Invoke-Probe "muse-structured" "Post" ($apiBase + "/responses") '{"model":"muse-spark-1.3","input":"Return JSON.","text":{"format":{"type":"json_schema","name":"ok","strict":true,"schema":{"type":"object","properties":{"ok":{"type":"boolean"}},"required":["ok"],"additionalProperties":false}}}}'
+Invoke-Probe "muse-tools" "Post" ($apiBase + "/responses") '{"model":"muse-spark-1.3","input":"What is 2+2? Use the tool if available.","tools":[{"type":"function","name":"add","description":"Add two numbers","parameters":{"type":"object","properties":{"a":{"type":"number"},"b":{"type":"number"}},"required":["a","b"],"additionalProperties":false}}]}'
 $tinyPng = "[BASE64_PLACEHOLDER_1]"
-Invoke-Probe "muse-image" "Post" ($apiBase + "/responses") ('{"model":"muse-spark-1.3","input":[{"type":"text","text":"Describe this image in one word."},{"type":"image","data":"' + $tinyPng + '","mime_type":"image/png"}]}')
-Invoke-Probe "sam-segment-guess" "Post" ($apiBase + "/media/segment") ('{"model":"sam-3.1","prompt":"circular official stamp","image":{"data":"' + $tinyPng + '","mime_type":"image/png"}}')
+Invoke-Probe "muse-image" "Post" ($apiBase + "/responses") ('{"model":"muse-spark-1.3","input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"Describe this image in one word."},{"type":"input_image","image_url":"data:image/png;base64,' + $tinyPng + '"}]}]}')
+Invoke-Probe "sam-segment" "Post" ($apiBase + "/responses") ('{"model":"sam-3.1","input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"circular official stamp"},{"type":"input_image","image_url":"data:image/png;base64,' + $tinyPng + '"}]}]}')
 Write-Probe ("probe done calls=" + $script:calls + " (budget 10). Record results in docs/AI_INTEGRATION.md 'Live probe results'. Key never logged.")

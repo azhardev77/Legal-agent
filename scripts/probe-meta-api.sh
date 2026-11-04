@@ -34,9 +34,9 @@ call() {
 probe "probe start base=$API_BASE time=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 call "models-list" "GET" "$API_BASE/models"
 call "muse-text" "POST" "$API_BASE/responses" '{"model":"muse-spark-1.3","input":"Reply with the single word OK."}'
-call "muse-structured" "POST" "$API_BASE/responses" '{"model":"muse-spark-1.3","input":"Return JSON: {\"ok\": true}.","response_format":{"type":"json_object"}}'
-call "muse-tools" "POST" "$API_BASE/responses" '{"model":"muse-spark-1.3","input":"What is 2+2? Use the tool if available.","tools":[{"type":"function","name":"add","description":"Add two numbers","parameters":{"type":"object","properties":{"a":{"type":"number"},"b":{"type":"number"}}}}]}'
+call "muse-structured" "POST" "$API_BASE/responses" '{"model":"muse-spark-1.3","input":"Return JSON.","text":{"format":{"type":"json_schema","name":"ok","strict":true,"schema":{"type":"object","properties":{"ok":{"type":"boolean"}},"required":["ok"],"additionalProperties":false}}}}'
+call "muse-tools" "POST" "$API_BASE/responses" '{"model":"muse-spark-1.3","input":"What is 2+2? Use the tool if available.","tools":[{"type":"function","name":"add","description":"Add two numbers","parameters":{"type":"object","properties":{"a":{"type":"number"},"b":{"type":"number"}},"required":["a","b"],"additionalProperties":false}}]}'
 TINY_PNG="iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-call "muse-image" "POST" "$API_BASE/responses" "{\"model\":\"muse-spark-1.3\",\"input\":[{\"type\":\"text\",\"text\":\"Describe this image in one word.\"},{\"type\":\"image\",\"data\":\"$TINY_PNG\",\"mime_type\":\"image/png\"}]}"
-call "sam-segment-guess" "POST" "$API_BASE/media/segment" "{\"model\":\"sam-3.1\",\"prompt\":\"circular official stamp\",\"image\":{\"data\":\"$TINY_PNG\",\"mime_type\":\"image/png\"}}"
+call "muse-image" "POST" "$API_BASE/responses" "{\"model\":\"muse-spark-1.3\",\"input\":[{\"type\":\"message\",\"role\":\"user\",\"content\":[{\"type\":\"input_text\",\"text\":\"Describe this image in one word.\"},{\"type\":\"input_image\",\"image_url\":\"data:image/png;base64,$TINY_PNG\"}]}]}"
+call "sam-segment" "POST" "$API_BASE/responses" "{\"model\":\"sam-3.1\",\"input\":[{\"type\":\"message\",\"role\":\"user\",\"content\":[{\"type\":\"input_text\",\"text\":\"circular official stamp\"},{\"type\":\"input_image\",\"image_url\":\"data:image/png;base64,$TINY_PNG\"}]}]}"
 probe "probe done calls=$calls (budget 10). Record results in docs/AI_INTEGRATION.md 'Live probe results'. Key never logged."
